@@ -1,6 +1,7 @@
 const express = require('express')
 
 const app = express();
+app.use(express.json());
 
 //user array
 
@@ -12,23 +13,48 @@ let user = [
 //get all users
 app.get("/getUser",(req,res)=>{
 
-    if(user)
-        res.send(user)
+    res.status(200).json(user);
 });
-
+ 
 //delete user
-app.delete("/deleteUser",(req,res)=>{
+app.delete("/deleteUser/:id",(req,res)=>{
+    const findUser = user.find(u => u.id === parseInt(req.params.id));
+    if(!findUser){
+        res.status(404).send({message: "error"});
+    } else {
+        user.splice(findUser,1);
+        res.status(200).send();
+    }
 
 })
 
 //add user
-app.post("/addUser",(req,rest)=>{
-    res.send("User Added");
+app.post("/addUser",(req,res)=>{
+
+    const {name, email} = req.body;
+    const newUser =  {
+        id: user.length + 1,
+        name,
+        email
+    }
+    user.push(newUser);
+    res.status(200).json(newUser);
 })
 
 //update user
-app.put("/updateUser:id",(req,res)=>{
+app.put("/updateUser/:id",(req,res)=>{
 
+    const findUser = user.find(u => u.id === parseInt(req.params.id))
+
+    if(!findUser){
+        res.status(404).json({message: "Error, user not found"})
+    }
+    else {
+        const {name, email} = req.body;
+        findUser.name = name;
+        findUser.email = email;
+        res.status(200).json(findUser)
+    }
 })
 
 app.listen(3212,()=>{
